@@ -93,7 +93,7 @@ function parse(file) {
                     }
                     for (var i = 1; i < node.parameters.length; i++) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.parameters[i])) {
-                            params += ", " + node.parameters[i].typeName.name;
+                            params += "," + node.parameters[i].typeName.name;
                         }
                     }
                 }
@@ -105,7 +105,7 @@ function parse(file) {
                     }
                     for (var i = 1; i < node.returnParameters.length; i++) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.returnParameters[i])) {
-                            returnparams += ", " + node.returnParameters[i].typeName.name;
+                            returnparams += "," + node.returnParameters[i].typeName.name;
                         }
                     }
                 }
@@ -138,18 +138,26 @@ function parse(file) {
             //    console.log("here: "+JSON.stringify(node.expression.typeName))
             //    console.log("h1: "+JSON.stringify(node.expression.name))
                 if (node.expression.typeName != undefined) {
-                    node.methodFullName = node.expression.typeName.name 
+                    if (node.expression.typeName.name  != null) {
+                        node.methodFullName = node.expression.typeName.name 
+                    } else {
+                        node.methodFullName = null
+                    }
                     if (node.arguments.length != 0) {
                         var args = "";
                         args = node.arguments[0].name;
                         for (var i = 1; i < node.arguments.length; i++) {
-                            args = ", "+node.arguments[i].name;
+                            args = ","+node.arguments[i].name;
                         }
                         node.methodFullName += "("+args+")"
                         
                     }
                 } else if (node.expression.name != undefined) {
+                    if (functionsPerContract[contractName][node.expression.name]) {
                     node.methodFullName = functionsPerContract[contractName][node.expression.name]
+                    } else {
+                        node.methodFullName = null
+                    }
                 } else {
                     node.methodFullName = null
                 }
