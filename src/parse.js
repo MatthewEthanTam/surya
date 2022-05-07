@@ -8,6 +8,7 @@ var fs = require('fs');
 var parser = require('@solidity-parser/parser');
 var treeify = require('treeify');
 var parserHelpers = require('./utils/parserHelpers');
+// const { astNodeTypes } = require('@solidity-parser/parser/dist/src/ast-types');
 
 function parse(file) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -32,6 +33,7 @@ function parse(file) {
         var contractUsingFor = {};
         var contractNames = ['0_global'];
         var contractName = '0_global';
+        var functionCallPerContract = {};
         parser.visit(ast, {
             ContractDefinition: function ContractDefinition(node) {
                 contractName = node.name;
@@ -81,41 +83,42 @@ function parse(file) {
                 }
             },
             FunctionDefinition: function FunctionDefinition(node) {
-                var params = ""
-                var returnparams = ""
+                var params = "";
+                var returnparams = "";
                 if (node.parameters.length != 0) {
                     if (node.parameters.length != 0) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.parameters[0])) {
-                            params = node.parameters[0].typeName.name
+                            params = node.parameters[0].typeName.name;
                         }
                     }
                     for (var i = 1; i < node.parameters.length; i++) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.parameters[i])) {
-                            params += ", " + node.parameters[i].typeName.name
+                            params += ", " + node.parameters[i].typeName.name;
                         }
                     }
                 }
                 if (node.returnParameters != null) {
                     if (node.returnParameters.length != 0) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.returnParameters[0])) {
-                            returnparams = node.returnParameters[0].typeName.name
+                            returnparams = node.returnParameters[0].typeName.name;
                         }
                     }
                     for (var i = 1; i < node.returnParameters.length; i++) {
                         if (parserHelpers.isElementaryTypeDeclaration(node.returnParameters[i])) {
-                            returnparams += ", " + node.returnParameters[i].typeName.name
+                            returnparams += ", " + node.returnParameters[i].typeName.name;
                         }
                     }
                 }
                 if (returnparams == "") {
-                    returnparams = "void"
+                    returnparams = "void";
                 }
                 if (node.name == null) {
-                    var name = "<init>"
+                    var name = "<init>";
                 } else {
-                    var name = node.name
+                    var name = node.name;
                 }
                 functionsPerContract[contractName][name] = contractName + "." + name + ":" + returnparams + "(" + params + ")";
+                // node.add("callInfo", contractName + "." + name + ":" + returnparams + "(" + params + ")");
             },
             EventDefinition: function EventDefinition(node) {
                 eventsPerContract[contractName].push(node.name);
@@ -130,23 +133,34 @@ function parse(file) {
                     contractUsingFor[contractName][typeNameName] = new Set([]);
                 }
                 contractUsingFor[contractName][typeNameName].add(node.libraryName);
+            },
+            FunctionCall: function FunctionCall(node) {
+            //    console.log("here: "+JSON.stringify(node.expression.typeName))
+            //    console.log("h1: "+JSON.stringify(node.expression.name))
+                if (node.expression.typeName != undefined) {
+                    node.methodFullName = node.expression.typeName.name 
+                    if (node.arguments.length != 0) {
+                        var args = "";
+                        args = node.arguments[0].name;
+                        for (var i = 1; i < node.arguments.length; i++) {
+                            args = ", "+node.arguments[i].name;
+                        }
+                        node.methodFullName += "("+args+")"
+                        
+                    }
+                } else if (node.expression.name != undefined) {
+                    node.methodFullName = functionsPerContract[contractName][node.expression.name]
+                } else {
+                    node.methodFullName = null
+                }
             }
+            
         });
-
-        for (var i = 1; i < contractNames.length; i++) {
-            callAdditionalInformation += "Contract: "+contractNames[i] + ";\n";
-            callAdditionalInformation += "Global variables: "+JSON.stringify(stateVars[contractNames[i]]) + ";\n"
-            callAdditionalInformation += "functions: "+JSON.stringify(functionsPerContract[contractNames[i]]) + ";\n"
-        }
-        callAdditionalInformation += ""
-    } else {
-        callAdditionalInformation += ""
     }
     if (options.jsonOutput) {
-
-        return callAdditionalInformation + JSON.stringify(ast);
+        return  JSON.stringify(ast);
     } else {
 
-        return callAdditionalInformation +treeify.asTree(ast, true);
+        return treeify.asTree(ast, true);
     }
 }
