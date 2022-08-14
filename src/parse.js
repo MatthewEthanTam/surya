@@ -5,10 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.parse = parse;
 var fs = require('fs');
-var parser = require('@solidity-parser/parser');
+var parser = require('@matthewethantam/parser');
 var treeify = require('treeify');
 var parserHelpers = require('./utils/parserHelpers');
-// const { astNodeTypes } = require('@solidity-parser/parser/dist/src/ast-types');
 
 function parse(file) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -118,7 +117,6 @@ function parse(file) {
                     var name = node.name;
                 }
                 functionsPerContract[contractName][name] = contractName + "." + name + ":" + returnparams + "(" + params + ")";
-                // node.add("callInfo", contractName + "." + name + ":" + returnparams + "(" + params + ")");
             },
             EventDefinition: function EventDefinition(node) {
                 eventsPerContract[contractName].push(node.name);
@@ -135,8 +133,6 @@ function parse(file) {
                 contractUsingFor[contractName][typeNameName].add(node.libraryName);
             },
             FunctionCall: function FunctionCall(node) {
-            //    console.log("here: "+JSON.stringify(node.expression.typeName))
-            //    console.log("h1: "+JSON.stringify(node.expression.name))
                 if (node.expression.typeName != undefined) {
                     if (node.expression.typeName.name  != null) {
                         node.methodFullName = node.expression.typeName.name 
@@ -168,7 +164,6 @@ function parse(file) {
     if (options.jsonOutput) {
         return  JSON.stringify(ast);
     } else {
-
         return treeify.asTree(ast, true);
     }
 }

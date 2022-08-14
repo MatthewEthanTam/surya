@@ -1,10 +1,11 @@
 {
-  "name": "surya",
+  "name": "@matthewethantam/surya",
   "description": "Sūrya, The Sun God: A set of utilities for inspecting the structure of Solidity contracts.",
-  "version": "0.4.6",
+  "version": "0.1.1",
   "main": "lib/index.js",
-  "author": [
-    "GNSPS"
+  "authors": [
+    "GNSPS",
+    "Matthew Ethan (forker)"
   ],
   "repository": "ConsenSys/surya",
   "license": "Apache-2.0",
@@ -29,9 +30,11 @@
     "coveralls": "^3.1.0",
     "husky": "^2.2.0",
     "mocha": "^5.2.0",
-    "sinon": "^5.1.1"
+    "sinon": "^5.1.1",
+    "custom-node-dep": "https://github.com/MatthewEthanTam/surya"
   },
   "dependencies": {
+    "@matthewethantam/parser": "^0.1.1",
     "@solidity-parser/parser": "^0.14.1",
     "c3-linearization": "^0.3.0",
     "colors": "^1.4.0",
